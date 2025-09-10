@@ -133,9 +133,8 @@ dotnet run
 ```
 
 La API estará disponible en:
-- **HTTP**: http://localhost:5000
-- **HTTPS**: https://localhost:5001
-- **Swagger**: https://localhost:5001/swagger
+- **HTTP**: http://localhost:5121
+- **Swagger**: http://localhost:5121/swagger
 
 ## ⚙️ Configuración
 
@@ -194,18 +193,19 @@ Configura las siguientes variables en `appsettings.json` o `appsettings.Developm
 Visita `/swagger` para explorar y probar todos los endpoints de la API:
 
 ```
-https://localhost:5001/swagger
+http://localhost:5121/swagger
 ```
 
 ### Ejemplos de Uso
 
 #### Registrar un nuevo usuario
 ```bash
-curl -X POST "https://localhost:5001/api/auth/register" \
+curl -X POST "http://localhost:5121/api/auth/register" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "estudiante@example.com",
-    "password": "MiPassword123!",
+    "password": "MiPassword123$",
+    "confirmPassword": "MiPassword123$",
     "firstName": "Juan",
     "lastName": "Pérez",
     "role": "student"
@@ -214,12 +214,26 @@ curl -X POST "https://localhost:5001/api/auth/register" \
 
 #### Login
 ```bash
-curl -X POST "https://localhost:5001/api/auth/login" \
+curl -X POST "http://localhost:5121/api/auth/login" \
   -H "Content-Type: application/json" \
   -d '{
     "email": "estudiante@example.com",
-    "password": "MiPassword123!"
+    "password": "MiPassword123$"
   }'
+```
+
+#### Usar endpoints autenticados
+```bash
+# Guardar token recibido del login
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+# Obtener perfil del usuario
+curl -X GET "http://localhost:5121/api/auth/me" \
+  -H "Authorization: Bearer $TOKEN"
+
+# Listar instructores activos
+curl -X GET "http://localhost:5121/api/instructors/active" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## 🏗️ Estructura del Proyecto
@@ -231,6 +245,9 @@ PilatesStudioAPI/
 │   ├── EmailSettings.cs
 │   └── JwtSettings.cs
 ├── 📁 Controllers/            # Controladores de API
+│   ├── AuthController.cs      # ✅ Autenticación
+│   ├── InstructorsController.cs # ✅ Gestión de instructores
+│   ├── StudentsController.cs  # ✅ Gestión de estudiantes
 │   └── WeatherForecastController.cs
 ├── 📁 Data/                   # Contexto de base de datos
 │   ├── Context/
@@ -251,21 +268,44 @@ PilatesStudioAPI/
 │   │   ├── Contact.cs
 │   │   └── AuditLog.cs
 │   ├── DTOs/                 # Data Transfer Objects
+│   │   ├── Auth/             # ✅ DTOs de autenticación
+│   │   ├── Users/            # ✅ DTOs de usuarios
+│   │   ├── Classes/          # DTOs de clases
+│   │   ├── Enrollments/      # DTOs de inscripciones
+│   │   ├── Packages/         # DTOs de paquetes
+│   │   ├── Payments/         # DTOs de pagos
+│   │   └── Attendance/       # DTOs de asistencia
 │   └── Requests/             # Modelos de request
 ├── 📁 Services/              # Lógica de negocio
 │   ├── Interfaces/
+│   │   ├── IJwtService.cs    # ✅ Servicio JWT
+│   │   ├── IAuthService.cs   # ✅ Servicio autenticación
+│   │   ├── IInstructorService.cs # ✅ Servicio instructores
+│   │   └── IStudentService.cs # ✅ Servicio estudiantes
 │   └── Implementations/
+│       ├── JwtService.cs     # ✅ Implementación JWT
+│       ├── AuthService.cs    # ✅ Implementación auth
+│       ├── InstructorService.cs # ✅ Implementación instructores
+│       └── StudentService.cs # ✅ Implementación estudiantes
 ├── 📁 Repositories/          # Patrón Repository
 │   ├── Interfaces/
 │   └── Implementations/
 ├── 📁 Middleware/            # Middlewares personalizados
-│   └── GlobalExceptionMiddleware.cs
+│   └── GlobalExceptionMiddleware.cs # ✅ Manejo de errores
+├── 📁 Mapping/               # Perfiles de AutoMapper
+│   └── MappingProfile.cs     # ✅ Configuración de mapeos
+├── 📁 Validators/            # Validadores FluentValidation
+│   └── Auth/                 # ✅ Validadores de autenticación
+│       ├── LoginRequestDtoValidator.cs
+│       ├── RegisterRequestDtoValidator.cs
+│       ├── ChangePasswordRequestDtoValidator.cs
+│       └── RefreshTokenRequestDtoValidator.cs
 ├── 📁 Extensions/            # Métodos de extensión
 ├── 📁 Utils/                 # Utilidades y helpers
 ├── 📁 Migrations/            # Migraciones EF Core
-├── Program.cs                # Punto de entrada
-├── appsettings.json          # Configuración
-└── README.md                 # Este archivo
+├── Program.cs                # ✅ Punto de entrada configurado
+├── appsettings.json          # ✅ Configuración completa
+└── README.md                 # Este archivo actualizado
 ```
 
 ## 🗄️ Base de Datos
@@ -312,49 +352,56 @@ dotnet ef database update MigracionAnterior
 
 ## 🔌 API Endpoints
 
-### Autenticación
-- `POST /api/auth/register` - Registrar usuario
+### 🔐 Autenticación (✅ Implementados)
+- `POST /api/auth/register` - Registrar nuevo usuario
 - `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/refresh` - Renovar token
+- `POST /api/auth/refresh-token` - Renovar access token
 - `POST /api/auth/logout` - Cerrar sesión
+- `POST /api/auth/change-password` - Cambiar contraseña
+- `GET /api/auth/me` - Obtener información del usuario actual
+- `POST /api/auth/forgot-password` - Solicitar reset de contraseña (preparado)
+- `POST /api/auth/reset-password` - Restablecer contraseña (preparado)
+- `POST /api/auth/verify-email` - Verificar email (preparado)
 
-### Usuarios
-- `GET /api/users` - Listar usuarios
-- `GET /api/users/{id}` - Obtener usuario
-- `PUT /api/users/{id}` - Actualizar usuario
-- `DELETE /api/users/{id}` - Eliminar usuario
-
-### Instructores
-- `GET /api/instructors` - Listar instructores
-- `POST /api/instructors` - Crear instructor
-- `GET /api/instructors/{id}` - Obtener instructor
+### 👨‍🏫 Instructores (✅ Implementados)
+- `GET /api/instructors` - Listar todos los instructores (Solo Admin)
+- `GET /api/instructors/active` - Listar instructores activos
+- `GET /api/instructors/{id}` - Obtener instructor por ID
+- `GET /api/instructors/me` - Obtener perfil del instructor actual
+- `POST /api/instructors` - Crear nuevo instructor (Solo Admin)
 - `PUT /api/instructors/{id}` - Actualizar instructor
+- `DELETE /api/instructors/{id}` - Eliminar instructor (Solo Admin)
+- `POST /api/instructors/{id}/activate` - Activar instructor (Solo Admin)
+- `POST /api/instructors/{id}/deactivate` - Desactivar instructor (Solo Admin)
 
-### Estudiantes
-- `GET /api/students` - Listar estudiantes
-- `POST /api/students` - Crear estudiante
-- `GET /api/students/{id}` - Obtener estudiante
+### 👥 Estudiantes (✅ Implementados)
+- `GET /api/students` - Listar todos los estudiantes
+- `GET /api/students/search?q={term}` - Buscar estudiantes
+- `GET /api/students/{id}` - Obtener estudiante por ID
+- `GET /api/students/me` - Obtener perfil del estudiante actual
+- `POST /api/students` - Crear nuevo estudiante
 - `PUT /api/students/{id}` - Actualizar estudiante
+- `DELETE /api/students/{id}` - Eliminar estudiante (Solo Admin)
 
-### Planes
-- `GET /api/plans` - Listar planes
-- `POST /api/plans` - Crear plan
-- `GET /api/plans/{id}` - Obtener plan
-- `PUT /api/plans/{id}` - Actualizar plan
+### 💳 Paquetes (🚧 Próximamente)
+- `GET /api/packages` - Listar paquetes
+- `POST /api/packages` - Crear paquete
+- `GET /api/packages/{id}` - Obtener paquete
+- `PUT /api/packages/{id}` - Actualizar paquete
 
-### Clases
+### 🏃‍♀️ Clases (🚧 Próximamente)
 - `GET /api/classes` - Listar clases
 - `POST /api/classes` - Crear clase
 - `GET /api/classes/{id}` - Obtener clase
 - `PUT /api/classes/{id}` - Actualizar clase
 - `GET /api/classes/available` - Clases disponibles
 
-### Reservas
-- `GET /api/reservations` - Listar reservas
-- `POST /api/reservations` - Crear reserva
-- `PUT /api/reservations/{id}/cancel` - Cancelar reserva
+### 📅 Inscripciones (🚧 Próximamente)
+- `GET /api/enrollments` - Listar inscripciones
+- `POST /api/enrollments` - Inscribirse a clase
+- `PUT /api/enrollments/{id}/cancel` - Cancelar inscripción
 
-### Pagos
+### 💰 Pagos (🚧 Próximamente)
 - `GET /api/payments` - Listar pagos
 - `POST /api/payments` - Procesar pago
 - `GET /api/payments/{id}` - Obtener pago
@@ -479,11 +526,15 @@ ENTRYPOINT ["dotnet", "PilatesStudioAPI.dll"]
 - [x] Base de datos y migraciones
 - [x] Autenticación JWT
 
-### Fase 2: 🔄 Autenticación y Usuarios (En Progreso)
-- [ ] Endpoints de autenticación
-- [ ] Gestión de usuarios
-- [ ] Perfiles de instructor/estudiante
-- [ ] Validaciones y DTOs
+### Fase 2: ✅ Autenticación y Usuarios (Completada)
+- [x] Endpoints de autenticación completos
+- [x] Gestión completa de usuarios
+- [x] Perfiles de instructor/estudiante
+- [x] Validaciones exhaustivas y DTOs
+- [x] JWT Service con access/refresh tokens
+- [x] Controladores con autorización por roles
+- [x] AutoMapper profiles configurados
+- [x] FluentValidation implementado
 
 ### Fase 3: 📅 Gestión de Clases
 - [ ] CRUD de clases
@@ -548,7 +599,37 @@ Abre un issue en GitHub con:
 
 ## 📝 Changelog
 
-### [1.0.0] - 2024-09-10
+### [2.0.0] - 2025-09-10
+#### 🎉 Fase 2 Completada: Autenticación y Gestión de Usuarios
+- ✅ **Sistema de Autenticación JWT Completo**
+  - Registro de usuarios con validaciones exhaustivas
+  - Login con generación de access y refresh tokens  
+  - Endpoints para cambio de contraseña y logout
+  - Preparado para verificación de email y reset de contraseña
+- ✅ **Gestión Completa de Usuarios**
+  - CRUD completo para instructores con autorización por roles
+  - CRUD completo para estudiantes con búsqueda
+  - Perfiles específicos para cada tipo de usuario
+  - Activación/desactivación de usuarios
+- ✅ **Validaciones y DTOs Robustos** 
+  - FluentValidation implementado en todos los endpoints
+  - DTOs específicos para cada operación
+  - Validaciones de contraseña con regex
+  - Mapeos automáticos con AutoMapper
+- ✅ **Seguridad Avanzada**
+  - Creación automática de roles en base de datos
+  - Políticas de autorización granulares
+  - JWT con claims personalizados
+  - Middleware de manejo global de errores
+
+#### 🔧 Mejoras Técnicas
+- AutoMapper profiles configurados para todas las entidades
+- Servicios con patrón de inyección de dependencias
+- Logging estructurado en todas las operaciones
+- Validación de timestamps mejorada para Identity
+- Arquitectura limpia con separación de responsabilidades
+
+### [1.0.0] - 2025-09-09
 #### Agregado
 - ✅ Configuración base del proyecto ASP.NET Core 8
 - ✅ Integración completa de Entity Framework Core
@@ -593,7 +674,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 - 📧 Email: francogames107@gmail.com
 - 🐛 Issues: [GitHub Issues](https://github.com/fRankete107/aline-back/issues)
-- 📚 Documentación: [Swagger UI](https://localhost:5001/swagger)
+- 📚 Documentación: [Swagger UI](http://localhost:5121/swagger)
 
 ---
 

@@ -384,14 +384,22 @@ public class PilatesStudioDbContext : IdentityDbContext<User, IdentityRole<long>
 
         foreach (var entry in entries)
         {
-            if (entry.Property("UpdatedAt") != null)
+            try
             {
-                entry.Property("UpdatedAt").CurrentValue = DateTime.UtcNow;
-            }
+                if (entry.Property("UpdatedAt") != null)
+                {
+                    entry.Property("UpdatedAt").CurrentValue = DateTime.UtcNow;
+                }
 
-            if (entry.State == EntityState.Added && entry.Property("CreatedAt") != null)
+                if (entry.State == EntityState.Added && entry.Property("CreatedAt") != null)
+                {
+                    entry.Property("CreatedAt").CurrentValue = DateTime.UtcNow;
+                }
+            }
+            catch
             {
-                entry.Property("CreatedAt").CurrentValue = DateTime.UtcNow;
+                // Skip entities that don't have timestamp properties (like IdentityRole)
+                continue;
             }
         }
     }

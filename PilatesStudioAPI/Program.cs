@@ -7,6 +7,8 @@ using PilatesStudioAPI.Configuration;
 using PilatesStudioAPI.Data.Context;
 using PilatesStudioAPI.Models.Entities;
 using PilatesStudioAPI.Middleware;
+using PilatesStudioAPI.Services.Interfaces;
+using PilatesStudioAPI.Services.Implementations;
 using Serilog;
 using System.Text;
 using FluentValidation;
@@ -24,6 +26,7 @@ builder.Services.AddControllers();
 // Configure FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Configure Entity Framework
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -173,7 +176,10 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Register application services (repositories, services, etc.)
-// TODO: Add service registrations here
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IInstructorService, InstructorService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 
 var app = builder.Build();
 
@@ -207,19 +213,37 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Create database if it doesn't exist
+// Create database and seed roles
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<PilatesStudioDbContext>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<long>>>();
+    
     try
     {
         Log.Information("Ensuring database is created...");
         context.Database.EnsureCreated();
         Log.Information("Database check completed.");
+
+        // Create default roles
+        Log.Information("Creating default roles...");
+        var roles = new[] { "admin", "instructor", "student" };
+        
+        foreach (var roleName in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                var role = new IdentityRole<long>(roleName);
+                await roleManager.CreateAsync(role);
+                Log.Information("Role {Role} created successfully", roleName);
+            }
+        }
+        
+        Log.Information("Roles creation completed.");
     }
     catch (Exception ex)
     {
-        Log.Error(ex, "An error occurred while ensuring database creation.");
+        Log.Error(ex, "An error occurred while ensuring database creation and role setup.");
     }
 }
 
