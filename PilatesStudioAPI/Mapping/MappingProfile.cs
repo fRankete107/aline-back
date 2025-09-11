@@ -1,4 +1,5 @@
 using AutoMapper;
+using PilatesStudioAPI.Models.DTOs;
 using PilatesStudioAPI.Models.DTOs.Auth;
 using PilatesStudioAPI.Models.DTOs.Users;
 using PilatesStudioAPI.Models.Entities;
@@ -59,5 +60,38 @@ public class MappingProfile : Profile
                 src.BirthDate.HasValue ? DateOnly.FromDateTime(src.BirthDate.Value) : (DateOnly?)null))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        // Zone Mappings
+        CreateMap<Zone, ZoneDto>();
+        CreateMap<CreateZoneDto, Zone>()
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdateZoneDto, Zone>()
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // Class Mappings
+        CreateMap<Class, ClassDto>()
+            .ForMember(dest => dest.InstructorName, opt => opt.MapFrom(src => 
+                src.Instructor != null && src.Instructor.User != null 
+                    ? $"{src.Instructor.FirstName} {src.Instructor.LastName}" 
+                    : string.Empty))
+            .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => 
+                src.Zone != null ? src.Zone.Name : string.Empty))
+            .ForMember(dest => dest.ReservedSpots, opt => opt.MapFrom(src => 
+                src.Reservations.Count(r => r.Status == "confirmed")))
+            .ForMember(dest => dest.AvailableSpots, opt => opt.MapFrom(src => 
+                src.CapacityLimit - src.Reservations.Count(r => r.Status == "confirmed")));
+
+        CreateMap<CreateClassDto, Class>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "scheduled"))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdateClassDto, Class>()
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

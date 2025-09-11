@@ -175,11 +175,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Register Repositories
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IInstructorRepository, PilatesStudioAPI.Repositories.Implementations.InstructorRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IZoneRepository, PilatesStudioAPI.Repositories.Implementations.ZoneRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IClassRepository, PilatesStudioAPI.Repositories.Implementations.ClassRepository>();
+
 // Register application services (repositories, services, etc.)
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IZoneService, PilatesStudioAPI.Services.Implementations.ZoneService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IClassService, PilatesStudioAPI.Services.Implementations.ClassService>();
 
 var app = builder.Build();
 

@@ -256,50 +256,58 @@ PilatesStudioAPI/
 │   └── Configurations/        # Configuraciones EF Core
 ├── 📁 Models/                 # Modelos de dominio
 │   ├── Entities/             # Entidades de EF Core
-│   │   ├── User.cs
-│   │   ├── Instructor.cs
-│   │   ├── Student.cs
-│   │   ├── Plan.cs
-│   │   ├── Subscription.cs
-│   │   ├── Zone.cs
-│   │   ├── Class.cs
-│   │   ├── Reservation.cs
-│   │   ├── Payment.cs
-│   │   ├── Contact.cs
-│   │   └── AuditLog.cs
+│   │   ├── User.cs            # ✅ Entidad usuario
+│   │   ├── Instructor.cs      # ✅ Entidad instructor
+│   │   ├── Student.cs         # ✅ Entidad estudiante
+│   │   ├── Zone.cs            # ✅ Entidad zona/sala
+│   │   ├── Class.cs           # ✅ Entidad clase
+│   │   ├── Plan.cs            # Entidad plan
+│   │   ├── Subscription.cs    # Entidad suscripción
+│   │   ├── Reservation.cs     # Entidad reserva
+│   │   ├── Payment.cs         # Entidad pago
+│   │   ├── Contact.cs         # Entidad contacto
+│   │   └── AuditLog.cs        # Entidad auditoría
 │   ├── DTOs/                 # Data Transfer Objects
 │   │   ├── Auth/             # ✅ DTOs de autenticación
 │   │   ├── Users/            # ✅ DTOs de usuarios
-│   │   ├── Classes/          # DTOs de clases
-│   │   ├── Enrollments/      # DTOs de inscripciones
-│   │   ├── Packages/         # DTOs de paquetes
+│   │   ├── ZoneDto.cs        # ✅ DTOs de zonas
+│   │   ├── ClassDto.cs       # ✅ DTOs de clases
+│   │   ├── Plans/            # DTOs de planes
+│   │   ├── Reservations/     # DTOs de reservas
 │   │   ├── Payments/         # DTOs de pagos
-│   │   └── Attendance/       # DTOs de asistencia
-│   └── Requests/             # Modelos de request
+│   │   └── Contacts/         # DTOs de contactos
+│   └── Validators/           # Validadores FluentValidation
+│       ├── Auth/             # ✅ Validadores de autenticación
+│       ├── ZoneValidators.cs # ✅ Validadores de zonas
+│       └── ClassValidators.cs# ✅ Validadores de clases
 ├── 📁 Services/              # Lógica de negocio
 │   ├── Interfaces/
 │   │   ├── IJwtService.cs    # ✅ Servicio JWT
 │   │   ├── IAuthService.cs   # ✅ Servicio autenticación
 │   │   ├── IInstructorService.cs # ✅ Servicio instructores
-│   │   └── IStudentService.cs # ✅ Servicio estudiantes
+│   │   ├── IStudentService.cs # ✅ Servicio estudiantes
+│   │   ├── IZoneService.cs   # ✅ Servicio zonas
+│   │   └── IClassService.cs  # ✅ Servicio clases
 │   └── Implementations/
 │       ├── JwtService.cs     # ✅ Implementación JWT
 │       ├── AuthService.cs    # ✅ Implementación auth
 │       ├── InstructorService.cs # ✅ Implementación instructores
-│       └── StudentService.cs # ✅ Implementación estudiantes
+│       ├── StudentService.cs # ✅ Implementación estudiantes
+│       ├── ZoneService.cs    # ✅ Implementación zonas
+│       └── ClassService.cs   # ✅ Implementación clases
 ├── 📁 Repositories/          # Patrón Repository
 │   ├── Interfaces/
+│   │   ├── IInstructorRepository.cs # ✅ Repositorio instructores
+│   │   ├── IZoneRepository.cs # ✅ Repositorio zonas
+│   │   └── IClassRepository.cs# ✅ Repositorio clases
 │   └── Implementations/
+│       ├── InstructorRepository.cs # ✅ Implementación instructores
+│       ├── ZoneRepository.cs # ✅ Implementación zonas
+│       └── ClassRepository.cs# ✅ Implementación clases
 ├── 📁 Middleware/            # Middlewares personalizados
 │   └── GlobalExceptionMiddleware.cs # ✅ Manejo de errores
 ├── 📁 Mapping/               # Perfiles de AutoMapper
-│   └── MappingProfile.cs     # ✅ Configuración de mapeos
-├── 📁 Validators/            # Validadores FluentValidation
-│   └── Auth/                 # ✅ Validadores de autenticación
-│       ├── LoginRequestDtoValidator.cs
-│       ├── RegisterRequestDtoValidator.cs
-│       ├── ChangePasswordRequestDtoValidator.cs
-│       └── RefreshTokenRequestDtoValidator.cs
+│   └── MappingProfile.cs     # ✅ Configuración de mapeos (actualizado)
 ├── 📁 Extensions/            # Métodos de extensión
 ├── 📁 Utils/                 # Utilidades y helpers
 ├── 📁 Migrations/            # Migraciones EF Core
@@ -383,23 +391,39 @@ dotnet ef database update MigracionAnterior
 - `PUT /api/students/{id}` - Actualizar estudiante
 - `DELETE /api/students/{id}` - Eliminar estudiante (Solo Admin)
 
-### 💳 Paquetes (🚧 Próximamente)
-- `GET /api/packages` - Listar paquetes
-- `POST /api/packages` - Crear paquete
-- `GET /api/packages/{id}` - Obtener paquete
-- `PUT /api/packages/{id}` - Actualizar paquete
+### 🏢 Zonas/Salas (✅ Implementados)
+- `GET /api/zones` - Listar todas las zonas (Admin/Instructor)
+- `GET /api/zones/active` - Listar zonas activas
+- `GET /api/zones/{id}` - Obtener zona por ID
+- `POST /api/zones` - Crear nueva zona (Solo Admin)
+- `PUT /api/zones/{id}` - Actualizar zona (Solo Admin)
+- `DELETE /api/zones/{id}` - Eliminar zona (Solo Admin)
 
-### 🏃‍♀️ Clases (🚧 Próximamente)
-- `GET /api/classes` - Listar clases
-- `POST /api/classes` - Crear clase
-- `GET /api/classes/{id}` - Obtener clase
-- `PUT /api/classes/{id}` - Actualizar clase
-- `GET /api/classes/available` - Clases disponibles
+### 🏃‍♀️ Clases (✅ Implementados)
+- `GET /api/classes` - Listar clases con filtros opcionales
+- `GET /api/classes/available` - Listar clases con espacios disponibles
+- `GET /api/classes/date-range?startDate={date}&endDate={date}` - Clases por rango de fechas
+- `GET /api/classes/instructor/{id}` - Clases por instructor
+- `GET /api/classes/zone/{id}` - Clases por zona
+- `GET /api/classes/{id}` - Obtener clase por ID
+- `POST /api/classes` - Crear nueva clase (Admin/Instructor)
+- `PUT /api/classes/{id}` - Actualizar clase (Admin/Instructor)
+- `DELETE /api/classes/{id}` - Eliminar clase (Solo Admin)
+- `GET /api/classes/instructor/{id}/conflicts` - Verificar conflictos de instructor
+- `GET /api/classes/zone/{id}/conflicts` - Verificar conflictos de zona
 
-### 📅 Inscripciones (🚧 Próximamente)
-- `GET /api/enrollments` - Listar inscripciones
-- `POST /api/enrollments` - Inscribirse a clase
-- `PUT /api/enrollments/{id}/cancel` - Cancelar inscripción
+### 💳 Planes y Suscripciones (🚧 Próximamente)
+- `GET /api/plans` - Listar planes
+- `POST /api/plans` - Crear plan
+- `GET /api/plans/{id}` - Obtener plan
+- `PUT /api/plans/{id}` - Actualizar plan
+- `GET /api/subscriptions` - Listar suscripciones
+- `POST /api/subscriptions` - Crear suscripción
+
+### 📅 Reservas (🚧 Próximamente)
+- `GET /api/reservations` - Listar reservas
+- `POST /api/reservations` - Reservar clase
+- `PUT /api/reservations/{id}/cancel` - Cancelar reserva
 
 ### 💰 Pagos (🚧 Próximamente)
 - `GET /api/payments` - Listar pagos
@@ -536,11 +560,13 @@ ENTRYPOINT ["dotnet", "PilatesStudioAPI.dll"]
 - [x] AutoMapper profiles configurados
 - [x] FluentValidation implementado
 
-### Fase 3: 📅 Gestión de Clases
-- [ ] CRUD de clases
-- [ ] Sistema de horarios
-- [ ] Gestión de zonas
-- [ ] Validaciones de negocio
+### Fase 3: ✅ Gestión de Clases y Horarios (Completada)
+- [x] CRUD completo de zonas/salas con validaciones
+- [x] CRUD completo de clases con horarios
+- [x] Sistema de programación y asignación de instructores
+- [x] Control de conflictos de horario automático
+- [x] Consultas y filtros avanzados para clases
+- [x] Validaciones de capacidad y lógica de negocio
 
 ### Fase 4: 💳 Planes y Suscripciones
 - [ ] CRUD de planes
@@ -598,6 +624,42 @@ Abre un issue en GitHub con:
 - Información del entorno
 
 ## 📝 Changelog
+
+### [3.0.0] - 2025-09-11
+#### 🎉 Fase 3 Completada: Gestión de Clases y Horarios
+- ✅ **Sistema Completo de Zonas/Salas**
+  - CRUD completo con validaciones de capacidad
+  - Control de estados activo/inactivo con soft delete inteligente
+  - Validación de nombres únicos y capacidades
+  - Gestión de equipamiento disponible
+- ✅ **Sistema Avanzado de Clases**
+  - CRUD completo con programación de horarios
+  - Asignación automática de instructores y zonas
+  - Control de conflictos de horario en tiempo real
+  - Sistema de estados (programada, en curso, completada, cancelada)
+  - Validaciones de duración mínima y máxima de clase
+- ✅ **Consultas y Filtros Inteligentes**
+  - Filtrado avanzado por fecha, instructor, zona, nivel y disponibilidad
+  - Endpoints para verificación de conflictos de programación
+  - Consultas de clases disponibles con espacios libres
+  - Optimización de queries con Include para navegación
+- ✅ **Validaciones de Lógica de Negocio**
+  - Prevención de doble booking de instructores y zonas
+  - Control automático de capacidad vs reservas
+  - Validaciones de horarios coherentes y restricciones temporales
+  - Soft delete inteligente cuando hay dependencias
+- ✅ **Repositorios y Servicios Robustos**
+  - Implementación del patrón Repository completo
+  - Servicios de negocio con validaciones exhaustivas
+  - Mapeo automático entre entidades y DTOs
+  - Manejo de errores específicos por tipo de operación
+
+#### 🔧 Mejoras Arquitectónicas
+- Patrón Repository implementado para mejor separación de concerns
+- AutoMapper configurado para entidades Zone y Class
+- FluentValidation con reglas de negocio específicas
+- Controladores con autorización granular por rol
+- Logging estructurado en todas las operaciones de clase y zona
 
 ### [2.0.0] - 2025-09-10
 #### 🎉 Fase 2 Completada: Autenticación y Gestión de Usuarios
