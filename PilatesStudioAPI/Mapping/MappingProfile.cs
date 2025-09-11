@@ -140,5 +140,54 @@ public class MappingProfile : Profile
         CreateMap<UpdateSubscriptionDto, Subscription>()
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // Reservation Mappings
+        CreateMap<Reservation, ReservationDto>()
+            .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => 
+                src.Student != null ? $"{src.Student.FirstName} {src.Student.LastName}" : string.Empty))
+            .ForMember(dest => dest.StudentEmail, opt => opt.MapFrom(src => 
+                src.Student != null && src.Student.User != null ? src.Student.User.Email : string.Empty))
+            .ForMember(dest => dest.ClassDate, opt => opt.MapFrom(src => 
+                src.Class != null ? src.Class.ClassDate : default))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => 
+                src.Class != null ? src.Class.StartTime : default))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => 
+                src.Class != null ? src.Class.EndTime : default))
+            .ForMember(dest => dest.ClassType, opt => opt.MapFrom(src => 
+                src.Class != null ? src.Class.ClassType : null))
+            .ForMember(dest => dest.ClassLevel, opt => opt.MapFrom(src => 
+                src.Class != null ? src.Class.DifficultyLevel : string.Empty))
+            .ForMember(dest => dest.InstructorName, opt => opt.MapFrom(src => 
+                src.Class != null && src.Class.Instructor != null 
+                    ? $"{src.Class.Instructor.FirstName} {src.Class.Instructor.LastName}" 
+                    : string.Empty))
+            .ForMember(dest => dest.ZoneName, opt => opt.MapFrom(src => 
+                src.Class != null && src.Class.Zone != null ? src.Class.Zone.Name : string.Empty))
+            .ForMember(dest => dest.CanCancel, opt => opt.MapFrom(src => 
+                src.Status == "confirmed" && src.Class != null &&
+                DateTime.Now < src.Class.ClassDate.ToDateTime(src.Class.StartTime).AddHours(-2)))
+            .ForMember(dest => dest.IsUpcoming, opt => opt.MapFrom(src => 
+                src.Status == "confirmed" && src.Class != null &&
+                (src.Class.ClassDate > DateOnly.FromDateTime(DateTime.Today) ||
+                 (src.Class.ClassDate == DateOnly.FromDateTime(DateTime.Today) && 
+                  src.Class.StartTime > TimeOnly.FromDateTime(DateTime.Now)))))
+            .ForMember(dest => dest.IsCompleted, opt => opt.MapFrom(src => 
+                src.Status == "completed"))
+            .ForMember(dest => dest.HoursUntilClass, opt => opt.MapFrom(src => 
+                src.Class != null 
+                    ? Math.Max(0, (int)(src.Class.ClassDate.ToDateTime(src.Class.StartTime) - DateTime.Now).TotalHours)
+                    : 0));
+
+        CreateMap<CreateReservationDto, Reservation>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "confirmed"))
+            .ForMember(dest => dest.ReservationDate, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdateReservationDto, Reservation>()
+            .ForMember(dest => dest.CancelledAt, opt => opt.MapFrom((src, dest) => 
+                src.Status == "cancelled" ? DateTime.UtcNow : dest.CancelledAt))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

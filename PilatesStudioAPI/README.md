@@ -274,7 +274,7 @@ PilatesStudioAPI/
 │   │   ├── ClassDto.cs       # ✅ DTOs de clases
 │   │   ├── PlanDto.cs        # ✅ DTOs de planes
 │   │   ├── SubscriptionDto.cs# ✅ DTOs de suscripciones
-│   │   ├── Reservations/     # DTOs de reservas
+│   │   ├── ReservationDto.cs # ✅ DTOs de reservas
 │   │   ├── Payments/         # DTOs de pagos
 │   │   └── Contacts/         # DTOs de contactos
 │   └── Validators/           # Validadores FluentValidation
@@ -282,7 +282,8 @@ PilatesStudioAPI/
 │       ├── ZoneValidators.cs # ✅ Validadores de zonas
 │       ├── ClassValidators.cs# ✅ Validadores de clases
 │       ├── PlanValidators.cs # ✅ Validadores de planes
-│       └── SubscriptionValidators.cs# ✅ Validadores de suscripciones
+│       ├── SubscriptionValidators.cs# ✅ Validadores de suscripciones
+│       └── ReservationValidators.cs# ✅ Validadores de reservas
 ├── 📁 Services/              # Lógica de negocio
 │   ├── Interfaces/
 │   │   ├── IJwtService.cs    # ✅ Servicio JWT
@@ -292,7 +293,8 @@ PilatesStudioAPI/
 │   │   ├── IZoneService.cs   # ✅ Servicio zonas
 │   │   ├── IClassService.cs  # ✅ Servicio clases
 │   │   ├── IPlanService.cs   # ✅ Servicio planes
-│   │   └── ISubscriptionService.cs# ✅ Servicio suscripciones
+│   │   ├── ISubscriptionService.cs# ✅ Servicio suscripciones
+│   │   └── IReservationService.cs# ✅ Servicio reservas
 │   └── Implementations/
 │       ├── JwtService.cs     # ✅ Implementación JWT
 │       ├── AuthService.cs    # ✅ Implementación auth
@@ -301,7 +303,8 @@ PilatesStudioAPI/
 │       ├── ZoneService.cs    # ✅ Implementación zonas
 │       ├── ClassService.cs   # ✅ Implementación clases
 │       ├── PlanService.cs    # ✅ Implementación planes
-│       └── SubscriptionService.cs# ✅ Implementación suscripciones
+│       ├── SubscriptionService.cs# ✅ Implementación suscripciones
+│       └── ReservationService.cs# ✅ Implementación reservas
 ├── 📁 Repositories/          # Patrón Repository
 │   ├── Interfaces/
 │   │   ├── IInstructorRepository.cs # ✅ Repositorio instructores
@@ -309,14 +312,16 @@ PilatesStudioAPI/
 │   │   ├── IZoneRepository.cs # ✅ Repositorio zonas
 │   │   ├── IClassRepository.cs# ✅ Repositorio clases
 │   │   ├── IPlanRepository.cs # ✅ Repositorio planes
-│   │   └── ISubscriptionRepository.cs# ✅ Repositorio suscripciones
+│   │   ├── ISubscriptionRepository.cs# ✅ Repositorio suscripciones
+│   │   └── IReservationRepository.cs# ✅ Repositorio reservas
 │   └── Implementations/
 │       ├── InstructorRepository.cs # ✅ Implementación instructores
 │       ├── StudentRepository.cs# ✅ Implementación estudiantes
 │       ├── ZoneRepository.cs # ✅ Implementación zonas
 │       ├── ClassRepository.cs# ✅ Implementación clases
 │       ├── PlanRepository.cs # ✅ Implementación planes
-│       └── SubscriptionRepository.cs# ✅ Implementación suscripciones
+│       ├── SubscriptionRepository.cs# ✅ Implementación suscripciones
+│       └── ReservationRepository.cs# ✅ Implementación reservas
 ├── 📁 Middleware/            # Middlewares personalizados
 │   └── GlobalExceptionMiddleware.cs # ✅ Manejo de errores
 ├── 📁 Mapping/               # Perfiles de AutoMapper
@@ -450,10 +455,22 @@ dotnet ef database update MigracionAnterior
 - `GET /api/subscriptions/student/{id}/can-reserve` - Verificar si puede reservar clases
 - `POST /api/subscriptions/process-expired` - Procesar suscripciones vencidas (Solo Admin)
 
-### 📅 Reservas (🚧 Próximamente)
-- `GET /api/reservations` - Listar reservas
-- `POST /api/reservations` - Reservar clase
-- `PUT /api/reservations/{id}/cancel` - Cancelar reserva
+### 📅 Reservas (✅ Implementados)
+- `GET /api/reservations` - Listar reservas con filtros avanzados (Admin/Instructor)
+- `GET /api/reservations/{id}` - Obtener reserva por ID
+- `GET /api/reservations/student/{id}` - Obtener reservas de un estudiante
+- `GET /api/reservations/student/{id}/upcoming` - Obtener reservas próximas de estudiante
+- `GET /api/reservations/class/{id}` - Obtener reservas de una clase (Admin/Instructor)
+- `GET /api/reservations/instructor/{id}` - Obtener reservas de un instructor (Admin/Instructor)
+- `POST /api/reservations` - Crear nueva reserva con validaciones automáticas
+- `PUT /api/reservations/{id}` - Actualizar reserva (Solo Admin)
+- `POST /api/reservations/{id}/cancel` - Cancelar reserva con políticas
+- `POST /api/reservations/{id}/complete` - Marcar reserva como completada (Admin/Instructor)
+- `POST /api/reservations/{id}/no-show` - Marcar como no presentado (Admin/Instructor)
+- `DELETE /api/reservations/{id}` - Eliminar reserva (Solo Admin)
+- `GET /api/reservations/student/{studentId}/can-reserve/{classId}` - Verificar elegibilidad
+- `GET /api/reservations/{id}/can-cancel` - Verificar si puede cancelar
+- `POST /api/reservations/process-completed` - Procesar reservas completadas (Solo Admin)
 
 ### 💰 Pagos (🚧 Próximamente)
 - `GET /api/payments` - Listar pagos
@@ -606,11 +623,14 @@ ENTRYPOINT ["dotnet", "PilatesStudioAPI.dll"]
 - [x] Validaciones de suscripciones activas para reservas
 - [x] Filtros avanzados y consultas especializadas
 
-### Fase 5: 📝 Sistema de Reservas
-- [ ] Booking de clases
-- [ ] Validaciones de capacidad
-- [ ] Cancelaciones
-- [ ] Notificaciones
+### Fase 5: ✅ Sistema de Reservas (Completada)
+- [x] CRUD completo de reservas con validaciones automáticas
+- [x] Control inteligente de capacidad de clases
+- [x] Sistema de cancelaciones con políticas de tiempo
+- [x] Estados de reserva (confirmada, cancelada, completada, no asistió)
+- [x] Validaciones de suscripciones activas para reservar
+- [x] Control automático de descuento de clases restantes
+- [x] Verificación de elegibilidad en tiempo real
 
 ### Fase 6: 💰 Gestión de Pagos
 - [ ] Procesamiento de pagos
@@ -656,6 +676,40 @@ Abre un issue en GitHub con:
 - Información del entorno
 
 ## 📝 Changelog
+
+### [5.0.0] - 2025-09-11
+#### 🎉 Fase 5 Completada: Sistema de Reservas
+- ✅ **Sistema Completo de Reservas**
+  - CRUD completo con validaciones automáticas de elegibilidad
+  - Control inteligente de capacidad de clases en tiempo real
+  - Validación automática de suscripciones activas antes de reservar
+  - Prevención de reservas duplicadas para la misma clase
+- ✅ **Gestión Avanzada de Estados**
+  - Estados completos (confirmada, cancelada, completada, no asistió)
+  - Transiciones automáticas con validaciones de negocio
+  - Procesamiento batch de reservas completadas
+  - Control de tiempo para cambios de estado
+- ✅ **Sistema de Cancelaciones con Políticas**
+  - Política configurable de cancelación (2 horas antes por defecto)
+  - Validación de elegibilidad para cancelar en tiempo real
+  - Motivos de cancelación opcionales para auditoría
+  - Integración con sistema de suscripciones para recuperar clases
+- ✅ **Validaciones Integrales de Negocio**
+  - Verificación automática de capacidad disponible
+  - Control de fechas y horarios (no reservar en el pasado)
+  - Validación de suscripciones con clases restantes
+  - Descuento automático de clases al confirmar reserva
+- ✅ **Consultas Especializadas y Filtros**
+  - Filtros avanzados por estudiante, clase, instructor, zona, fechas
+  - Consultas de reservas próximas con cálculos de tiempo
+  - Dashboard para instructores con sus reservas
+  - Verificaciones de elegibilidad en tiempo real
+
+#### 🔧 Mejoras Arquitectónicas
+- AutoMapper con lógica compleja para cálculos de tiempo y estados
+- Repositorio con consultas optimizadas para múltiples escenarios
+- Servicios con validaciones multicapa y lógica de negocio robusta
+- Controladores con autorización granular según funcionalidad
 
 ### [4.0.0] - 2025-09-11
 #### 🎉 Fase 4 Completada: Planes y Suscripciones
