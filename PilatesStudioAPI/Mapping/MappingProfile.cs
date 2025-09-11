@@ -189,5 +189,29 @@ public class MappingProfile : Profile
                 src.Status == "cancelled" ? DateTime.UtcNow : dest.CancelledAt))
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // Payment Mappings
+        CreateMap<Payment, PaymentDto>()
+            .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => 
+                src.Student != null ? $"{src.Student.FirstName} {src.Student.LastName}" : string.Empty))
+            .ForMember(dest => dest.PlanTitle, opt => opt.MapFrom(src => 
+                src.Plan != null ? src.Plan.Title : string.Empty))
+            .ForMember(dest => dest.IsRefundable, opt => opt.MapFrom(src => 
+                src.Status == "completed" && src.PaymentDate > DateTime.UtcNow.AddDays(-30)))
+            .ForMember(dest => dest.DaysSincePayment, opt => opt.MapFrom(src => 
+                Math.Max(0, (int)(DateTime.UtcNow - src.PaymentDate).TotalDays)));
+
+        CreateMap<CreatePaymentDto, Payment>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "pending"))
+            .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => 
+                src.PaymentDate ?? DateTime.UtcNow))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdatePaymentDto, Payment>()
+            .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => 
+                src.PaymentDate ?? DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

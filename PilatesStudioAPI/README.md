@@ -275,7 +275,7 @@ PilatesStudioAPI/
 │   │   ├── PlanDto.cs        # ✅ DTOs de planes
 │   │   ├── SubscriptionDto.cs# ✅ DTOs de suscripciones
 │   │   ├── ReservationDto.cs # ✅ DTOs de reservas
-│   │   ├── Payments/         # DTOs de pagos
+│   │   ├── PaymentDto.cs     # ✅ DTOs de pagos
 │   │   └── Contacts/         # DTOs de contactos
 │   └── Validators/           # Validadores FluentValidation
 │       ├── Auth/             # ✅ Validadores de autenticación
@@ -283,7 +283,8 @@ PilatesStudioAPI/
 │       ├── ClassValidators.cs# ✅ Validadores de clases
 │       ├── PlanValidators.cs # ✅ Validadores de planes
 │       ├── SubscriptionValidators.cs# ✅ Validadores de suscripciones
-│       └── ReservationValidators.cs# ✅ Validadores de reservas
+│       ├── ReservationValidators.cs# ✅ Validadores de reservas
+│       └── PaymentValidators.cs# ✅ Validadores de pagos
 ├── 📁 Services/              # Lógica de negocio
 │   ├── Interfaces/
 │   │   ├── IJwtService.cs    # ✅ Servicio JWT
@@ -294,7 +295,8 @@ PilatesStudioAPI/
 │   │   ├── IClassService.cs  # ✅ Servicio clases
 │   │   ├── IPlanService.cs   # ✅ Servicio planes
 │   │   ├── ISubscriptionService.cs# ✅ Servicio suscripciones
-│   │   └── IReservationService.cs# ✅ Servicio reservas
+│   │   ├── IReservationService.cs# ✅ Servicio reservas
+│   │   └── IPaymentService.cs# ✅ Servicio pagos
 │   └── Implementations/
 │       ├── JwtService.cs     # ✅ Implementación JWT
 │       ├── AuthService.cs    # ✅ Implementación auth
@@ -304,7 +306,8 @@ PilatesStudioAPI/
 │       ├── ClassService.cs   # ✅ Implementación clases
 │       ├── PlanService.cs    # ✅ Implementación planes
 │       ├── SubscriptionService.cs# ✅ Implementación suscripciones
-│       └── ReservationService.cs# ✅ Implementación reservas
+│       ├── ReservationService.cs# ✅ Implementación reservas
+│       └── PaymentService.cs# ✅ Implementación pagos
 ├── 📁 Repositories/          # Patrón Repository
 │   ├── Interfaces/
 │   │   ├── IInstructorRepository.cs # ✅ Repositorio instructores
@@ -313,7 +316,8 @@ PilatesStudioAPI/
 │   │   ├── IClassRepository.cs# ✅ Repositorio clases
 │   │   ├── IPlanRepository.cs # ✅ Repositorio planes
 │   │   ├── ISubscriptionRepository.cs# ✅ Repositorio suscripciones
-│   │   └── IReservationRepository.cs# ✅ Repositorio reservas
+│   │   ├── IReservationRepository.cs# ✅ Repositorio reservas
+│   │   └── IPaymentRepository.cs# ✅ Repositorio pagos
 │   └── Implementations/
 │       ├── InstructorRepository.cs # ✅ Implementación instructores
 │       ├── StudentRepository.cs# ✅ Implementación estudiantes
@@ -321,7 +325,8 @@ PilatesStudioAPI/
 │       ├── ClassRepository.cs# ✅ Implementación clases
 │       ├── PlanRepository.cs # ✅ Implementación planes
 │       ├── SubscriptionRepository.cs# ✅ Implementación suscripciones
-│       └── ReservationRepository.cs# ✅ Implementación reservas
+│       ├── ReservationRepository.cs# ✅ Implementación reservas
+│       └── PaymentRepository.cs# ✅ Implementación pagos
 ├── 📁 Middleware/            # Middlewares personalizados
 │   └── GlobalExceptionMiddleware.cs # ✅ Manejo de errores
 ├── 📁 Mapping/               # Perfiles de AutoMapper
@@ -472,10 +477,28 @@ dotnet ef database update MigracionAnterior
 - `GET /api/reservations/{id}/can-cancel` - Verificar si puede cancelar
 - `POST /api/reservations/process-completed` - Procesar reservas completadas (Solo Admin)
 
-### 💰 Pagos (🚧 Próximamente)
-- `GET /api/payments` - Listar pagos
-- `POST /api/payments` - Procesar pago
-- `GET /api/payments/{id}` - Obtener pago
+### 💰 Pagos (✅ Implementados)
+- `GET /api/payments` - Listar todos los pagos (Solo Admin)
+- `GET /api/payments/{id}` - Obtener pago por ID
+- `POST /api/payments` - Crear nuevo pago
+- `PUT /api/payments/{id}` - Actualizar pago (Admin/Instructor)
+- `DELETE /api/payments/{id}` - Eliminar pago (Solo Admin - solo pending/failed)
+- `POST /api/payments/filter` - Obtener pagos con filtros avanzados (Admin/Instructor)
+- `GET /api/payments/student/{studentId}` - Obtener pagos de un estudiante
+- `GET /api/payments/plan/{planId}` - Obtener pagos por plan (Admin/Instructor)
+- `GET /api/payments/date-range?startDate={date}&endDate={date}` - Pagos por rango de fechas (Admin/Instructor)
+- `GET /api/payments/status/{status}` - Obtener pagos por estado (Admin/Instructor)
+- `GET /api/payments/pending` - Obtener pagos pendientes (Solo Admin)
+- `GET /api/payments/refundable?daysLimit={days}` - Obtener pagos reembolsables (Solo Admin)
+- `GET /api/payments/stats?startDate={date}&endDate={date}` - Estadísticas de pagos (Solo Admin)
+- `POST /api/payments/{id}/process` - Procesar pago (Solo Admin)
+- `POST /api/payments/{id}/refund` - Reembolsar pago (Solo Admin)
+- `GET /api/payments/student/{studentId}/history?limit={limit}` - Historial de pagos de estudiante
+- `GET /api/payments/student/{studentId}/total` - Total pagado por estudiante
+- `GET /api/payments/method/{paymentMethod}` - Pagos por método (Solo Admin)
+- `POST /api/payments/subscription` - Crear pago para suscripción (endpoint simplificado)
+- `POST /api/payments/process-pending` - Procesar pagos pendientes en batch (Solo Admin)
+- `HEAD /api/payments/{id}` - Verificar si existe el pago
 
 *Documentación completa disponible en `/swagger`*
 
@@ -632,11 +655,11 @@ ENTRYPOINT ["dotnet", "PilatesStudioAPI.dll"]
 - [x] Control automático de descuento de clases restantes
 - [x] Verificación de elegibilidad en tiempo real
 
-### Fase 6: 💰 Gestión de Pagos
-- [ ] Procesamiento de pagos
-- [ ] Múltiples métodos de pago
-- [ ] Facturación
-- [ ] Reportes financieros
+### Fase 6: ✅ Gestión de Pagos (Completada)
+- [x] Procesamiento de pagos
+- [x] Múltiples métodos de pago
+- [x] Sistema de reembolsos
+- [x] Estadísticas financieras
 
 ### Fase 7: 📊 Reportes y Analytics
 - [ ] Dashboard administrativo
@@ -676,6 +699,41 @@ Abre un issue en GitHub con:
 - Información del entorno
 
 ## 📝 Changelog
+
+### [6.0.0] - 2025-09-11
+#### 🎉 Fase 6 Completada: Sistema de Pagos
+- ✅ **Sistema Completo de Pagos**
+  - CRUD completo con múltiples métodos de pago (efectivo, tarjetas, transferencia, billeteras digitales)
+  - Gestión de estados de pago (pendiente, completado, fallido, reembolsado)
+  - Validaciones automáticas de montos contra precios de planes
+  - Control de referencias de pago obligatorias según método
+- ✅ **Procesamiento y Validación**
+  - Simulador de procesamiento de pagos con tasas de éxito variables
+  - Validaciones de transiciones de estado permitidas
+  - Políticas de reembolso con límite de tiempo configurable (30 días)
+  - Integración automática con sistema de suscripciones al completar pagos
+- ✅ **Funcionalidades Avanzadas**
+  - Sistema de reembolsos con motivos y montos parciales
+  - Filtros avanzados por estudiante, plan, método, estado, fechas y rangos de monto
+  - Estadísticas completas con métricas por método de pago e ingresos mensuales
+  - Endpoint simplificado para crear pagos de suscripciones
+- ✅ **Gestión y Administración**
+  - Historial completo de pagos por estudiante con límites configurables
+  - Procesamiento batch de pagos pendientes con manejo de errores
+  - Consultas especializadas (pendientes, reembolsables, por método de pago)
+  - 20 endpoints con autorización granular según funcionalidad
+- ✅ **Integración con Suscripciones**
+  - Creación automática de suscripciones al completar pagos
+  - Extensión de suscripciones existentes al pagar el mismo plan
+  - Cambio de plan con cancelación automática de suscripción anterior
+  - Validación de elegibilidad antes de procesar pagos
+
+#### 🔧 Mejoras Arquitectónicas
+- AutoMapper con lógica de cálculo de días transcurridos y elegibilidad para reembolsos
+- Repositorio con consultas optimizadas y estadísticas agregadas complejas
+- Servicios con validaciones multicapa y lógica de simulación de pagos
+- Controladores con endpoints especializados y autorización por roles
+- FluentValidation con reglas específicas por método de pago y operación
 
 ### [5.0.0] - 2025-09-11
 #### 🎉 Fase 5 Completada: Sistema de Reservas

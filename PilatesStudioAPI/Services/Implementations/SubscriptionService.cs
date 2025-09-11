@@ -196,6 +196,55 @@ public class SubscriptionService : ISubscriptionService
         return activeSubscription != null && activeSubscription.ClassesRemaining > 0;
     }
 
+    public async Task<SubscriptionDto> ProcessPaymentSubscriptionAsync(long studentId, long planId)
+    {
+        var plan = await _planRepository.GetByIdAsync(planId);
+        if (plan == null)
+            throw new ArgumentException($"Plan with ID {planId} not found.");
+
+        if (!await _studentRepository.ExistsAsync(studentId))
+            throw new ArgumentException($"Student with ID {studentId} not found.");
+
+        // Check if student already has an active subscription
+        var existingSubscription = await _subscriptionRepository.GetActiveSubscriptionByStudentAsync(studentId);
+        
+        if (existingSubscription != null)
+        {
+            // If same plan, extend the subscription
+            if (existingSubscription.PlanId == planId)
+            {
+                existingSubscription.ExpiryDate = existingSubscription.ExpiryDate.AddDays(30); // Extend by plan duration
+                existingSubscription.ClassesRemaining += plan.MonthlyClasses;
+                existingSubscription.UpdatedAt = DateTime.UtcNow;
+                
+                await _subscriptionRepository.UpdateAsync(existingSubscription.Id, existingSubscription);
+                return _mapper.Map<SubscriptionDto>(existingSubscription);
+            }
+            else
+            {
+                // Different plan, cancel existing and create new
+                existingSubscription.Status = "cancelled";
+                await _subscriptionRepository.UpdateAsync(existingSubscription.Id, existingSubscription);
+            }
+        }
+
+        // Create new subscription
+        var subscription = new Subscription
+        {
+            StudentId = studentId,
+            PlanId = planId,
+            StartDate = DateOnly.FromDateTime(DateTime.Today),
+            ExpiryDate = DateOnly.FromDateTime(DateTime.Today.AddDays(30)), // 30 days from today
+            ClassesRemaining = plan.MonthlyClasses,
+            Status = "active",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var createdSubscription = await _subscriptionRepository.CreateAsync(subscription);
+        return _mapper.Map<SubscriptionDto>(createdSubscription);
+    }
+
     private async Task ValidateSubscriptionCreationAsync(CreateSubscriptionDto createSubscriptionDto)
     {
         if (!await _studentRepository.ExistsAsync(createSubscriptionDto.StudentId))

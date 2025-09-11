@@ -22,4 +22,5 @@ public interface ISubscriptionService
     Task<bool> UseClassFromSubscriptionAsync(long studentId);
     Task<int> ProcessExpiredSubscriptionsAsync();
     Task<bool> CanStudentReserveClassAsync(long studentId);
+    Task<SubscriptionDto> ProcessPaymentSubscriptionAsync(long studentId, long planId);
 }
