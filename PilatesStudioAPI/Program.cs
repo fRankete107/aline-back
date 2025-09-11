@@ -130,6 +130,15 @@ var emailSettings = new EmailSettings();
 builder.Configuration.GetSection("EmailSettings").Bind(emailSettings);
 builder.Services.AddSingleton(emailSettings);
 
+// Configure Memory Cache
+builder.Services.AddMemoryCache();
+
+// Configure Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck<PilatesStudioAPI.HealthChecks.DatabaseHealthCheck>("database_custom")
+    .AddCheck<PilatesStudioAPI.HealthChecks.MemoryCacheHealthCheck>("memory_cache")
+    .AddCheck<PilatesStudioAPI.HealthChecks.ApiHealthCheck>("api_services");
+
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -190,6 +199,7 @@ builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IAnalyticsRe
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IInstructorService, InstructorService>();
+
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IZoneService, PilatesStudioAPI.Services.Implementations.ZoneService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IClassService, PilatesStudioAPI.Services.Implementations.ClassService>();
@@ -198,6 +208,7 @@ builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.ISubscriptionSer
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IReservationService, PilatesStudioAPI.Services.Implementations.ReservationService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IPaymentService, PilatesStudioAPI.Services.Implementations.PaymentService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IAnalyticsService, PilatesStudioAPI.Services.Implementations.AnalyticsService>();
+
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IReportsService, PilatesStudioAPI.Services.Implementations.ReportsService>();
 
 var app = builder.Build();
@@ -207,8 +218,14 @@ var app = builder.Build();
 // Use Global Exception Handling
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-// Use Serilog request logging
-app.UseSerilogRequestLogging();
+// Use Custom Response Caching Middleware
+app.UseMiddleware<ResponseCachingMiddleware>();
+
+// Use Structured Logging Middleware
+app.UseStructuredLogging();
+
+// Use Serilog request logging (disabled in favor of structured logging middleware)
+// app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
@@ -231,6 +248,43 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map Health Checks
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var response = new
+        {
+            status = report.Status.ToString(),
+            totalDuration = report.TotalDuration.TotalMilliseconds,
+            checks = report.Entries.Select(x => new
+            {
+                name = x.Key,
+                status = x.Value.Status.ToString(),
+                duration = x.Value.Duration.TotalMilliseconds,
+                description = x.Value.Description,
+                data = x.Value.Data,
+                exception = x.Value.Exception?.Message
+            })
+        };
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response, new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        }));
+    }
+});
+
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false
+});
 
 // Create database and seed roles
 using (var scope = app.Services.CreateScope())

@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  pilates-db:
+    image: mysql:8.0
+    container_name: pilates-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: PilatesStudio2024!
+      MYSQL_DATABASE: pilates_studio
+      MYSQL_USER: pilatesuser
+      MYSQL_PASSWORD: PilatesUser2024!
+    ports:
+      - "3306:3306"
+    volumes:
+      - pilates_data:/var/lib/mysql
+      - ./pilates_database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - pilates-network
+
+  # API Application
+  pilates-api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: pilates-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=pilates-db;Port=3306;Database=pilates_studio;Uid=pilatesuser;Pwd=PilatesUser2024!;CharSet=utf8mb4;AllowUserVariables=true;"
+      JwtSettings__Secret: "your-super-secret-jwt-key-here-min-32-characters-long-production-key"
+      JwtSettings__Issuer: "PilatesStudioAPI"
+      JwtSettings__Audience: "PilatesStudioClient"
+      JwtSettings__ExpiryMinutes: "60"
+      JwtSettings__RefreshTokenExpiryDays: "7"
+      EmailSettings__SmtpServer: "smtp.gmail.com"
+      EmailSettings__SmtpPort: "587"
+      EmailSettings__Username: "${EMAIL_USERNAME:-}"
+      EmailSettings__Password: "${EMAIL_PASSWORD:-}"
+      EmailSettings__FromEmail: "${FROM_EMAIL:-noreply@pilatesstudio.com}"
+      EmailSettings__FromName: "Pilates Studio"
+      CorsSettings__AllowedOrigins__0: "http://localhost:3000"
+      CorsSettings__AllowedOrigins__1: "http://localhost:4200"
+      CorsSettings__AllowedOrigins__2: "https://localhost:3000"
+      CorsSettings__AllowedOrigins__3: "https://localhost:4200"
+      CorsSettings__AllowCredentials: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      pilates-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - pilates-network
+
+  # Redis Cache (Optional - for distributed caching)
+  pilates-redis:
+    image: redis:7-alpine
+    container_name: pilates-redis
+    command: redis-server --requirepass PilatesRedis2024!
+    ports:
+      - "6379:6379"
+    volumes:
+      - pilates_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "auth", "PilatesRedis2024!", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - pilates-network
+    profiles:
+      - redis
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: pilates-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - pilates-api
+    restart: unless-stopped
+    networks:
+      - pilates-network
+    profiles:
+      - nginx
+
+volumes:
+  pilates_data:
+    driver: local
+  pilates_redis:
+    driver: local
+
+networks:
+  pilates-network:
+    driver: bridge
