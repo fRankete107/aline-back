@@ -184,6 +184,7 @@ builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IPlanReposit
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.ISubscriptionRepository, PilatesStudioAPI.Repositories.Implementations.SubscriptionRepository>();
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IReservationRepository, PilatesStudioAPI.Repositories.Implementations.ReservationRepository>();
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IPaymentRepository, PilatesStudioAPI.Repositories.Implementations.PaymentRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IAnalyticsRepository, PilatesStudioAPI.Repositories.Implementations.AnalyticsRepository>();
 
 // Register application services (repositories, services, etc.)
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -196,6 +197,8 @@ builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IPlanService, Pi
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.ISubscriptionService, PilatesStudioAPI.Services.Implementations.SubscriptionService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IReservationService, PilatesStudioAPI.Services.Implementations.ReservationService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IPaymentService, PilatesStudioAPI.Services.Implementations.PaymentService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IAnalyticsService, PilatesStudioAPI.Services.Implementations.AnalyticsService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IReportsService, PilatesStudioAPI.Services.Implementations.ReportsService>();
 
 var app = builder.Build();
 
