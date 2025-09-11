@@ -93,5 +93,52 @@ public class MappingProfile : Profile
         CreateMap<UpdateClassDto, Class>()
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
             .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // Plan Mappings
+        CreateMap<Plan, PlanDto>()
+            .ForMember(dest => dest.ActiveSubscriptionsCount, opt => opt.MapFrom(src => 
+                src.Subscriptions.Count(s => s.Status == "active")));
+
+        CreateMap<CreatePlanDto, Plan>()
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdatePlanDto, Plan>()
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+        // Subscription Mappings
+        CreateMap<Subscription, SubscriptionDto>()
+            .ForMember(dest => dest.StudentName, opt => opt.MapFrom(src => 
+                src.Student != null ? $"{src.Student.FirstName} {src.Student.LastName}" : string.Empty))
+            .ForMember(dest => dest.StudentEmail, opt => opt.MapFrom(src => 
+                src.Student != null && src.Student.User != null ? src.Student.User.Email : string.Empty))
+            .ForMember(dest => dest.PlanTitle, opt => opt.MapFrom(src => 
+                src.Plan != null ? src.Plan.Title : string.Empty))
+            .ForMember(dest => dest.PlanPrice, opt => opt.MapFrom(src => 
+                src.Plan != null ? src.Plan.Price : 0))
+            .ForMember(dest => dest.TotalClasses, opt => opt.MapFrom(src => 
+                src.Plan != null ? src.Plan.MonthlyClasses : 0))
+            .ForMember(dest => dest.UsedClasses, opt => opt.MapFrom(src => 
+                src.Plan != null ? src.Plan.MonthlyClasses - src.ClassesRemaining : 0))
+            .ForMember(dest => dest.DaysRemaining, opt => opt.MapFrom(src => 
+                Math.Max(0, src.ExpiryDate.DayNumber - DateOnly.FromDateTime(DateTime.Today).DayNumber)))
+            .ForMember(dest => dest.IsExpired, opt => opt.MapFrom(src => 
+                src.ExpiryDate < DateOnly.FromDateTime(DateTime.Today) || src.Status == "expired"))
+            .ForMember(dest => dest.IsExpiringSoon, opt => opt.MapFrom(src => 
+                src.Status == "active" && src.ExpiryDate <= DateOnly.FromDateTime(DateTime.Today.AddDays(7)) && 
+                src.ExpiryDate >= DateOnly.FromDateTime(DateTime.Today)));
+
+        CreateMap<CreateSubscriptionDto, Subscription>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => 
+                src.StartDate ?? DateOnly.FromDateTime(DateTime.Today)))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "active"))
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+        CreateMap<UpdateSubscriptionDto, Subscription>()
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
     }
 }

@@ -272,14 +272,17 @@ PilatesStudioAPI/
 │   │   ├── Users/            # ✅ DTOs de usuarios
 │   │   ├── ZoneDto.cs        # ✅ DTOs de zonas
 │   │   ├── ClassDto.cs       # ✅ DTOs de clases
-│   │   ├── Plans/            # DTOs de planes
+│   │   ├── PlanDto.cs        # ✅ DTOs de planes
+│   │   ├── SubscriptionDto.cs# ✅ DTOs de suscripciones
 │   │   ├── Reservations/     # DTOs de reservas
 │   │   ├── Payments/         # DTOs de pagos
 │   │   └── Contacts/         # DTOs de contactos
 │   └── Validators/           # Validadores FluentValidation
 │       ├── Auth/             # ✅ Validadores de autenticación
 │       ├── ZoneValidators.cs # ✅ Validadores de zonas
-│       └── ClassValidators.cs# ✅ Validadores de clases
+│       ├── ClassValidators.cs# ✅ Validadores de clases
+│       ├── PlanValidators.cs # ✅ Validadores de planes
+│       └── SubscriptionValidators.cs# ✅ Validadores de suscripciones
 ├── 📁 Services/              # Lógica de negocio
 │   ├── Interfaces/
 │   │   ├── IJwtService.cs    # ✅ Servicio JWT
@@ -287,23 +290,33 @@ PilatesStudioAPI/
 │   │   ├── IInstructorService.cs # ✅ Servicio instructores
 │   │   ├── IStudentService.cs # ✅ Servicio estudiantes
 │   │   ├── IZoneService.cs   # ✅ Servicio zonas
-│   │   └── IClassService.cs  # ✅ Servicio clases
+│   │   ├── IClassService.cs  # ✅ Servicio clases
+│   │   ├── IPlanService.cs   # ✅ Servicio planes
+│   │   └── ISubscriptionService.cs# ✅ Servicio suscripciones
 │   └── Implementations/
 │       ├── JwtService.cs     # ✅ Implementación JWT
 │       ├── AuthService.cs    # ✅ Implementación auth
 │       ├── InstructorService.cs # ✅ Implementación instructores
 │       ├── StudentService.cs # ✅ Implementación estudiantes
 │       ├── ZoneService.cs    # ✅ Implementación zonas
-│       └── ClassService.cs   # ✅ Implementación clases
+│       ├── ClassService.cs   # ✅ Implementación clases
+│       ├── PlanService.cs    # ✅ Implementación planes
+│       └── SubscriptionService.cs# ✅ Implementación suscripciones
 ├── 📁 Repositories/          # Patrón Repository
 │   ├── Interfaces/
 │   │   ├── IInstructorRepository.cs # ✅ Repositorio instructores
+│   │   ├── IStudentRepository.cs# ✅ Repositorio estudiantes
 │   │   ├── IZoneRepository.cs # ✅ Repositorio zonas
-│   │   └── IClassRepository.cs# ✅ Repositorio clases
+│   │   ├── IClassRepository.cs# ✅ Repositorio clases
+│   │   ├── IPlanRepository.cs # ✅ Repositorio planes
+│   │   └── ISubscriptionRepository.cs# ✅ Repositorio suscripciones
 │   └── Implementations/
 │       ├── InstructorRepository.cs # ✅ Implementación instructores
+│       ├── StudentRepository.cs# ✅ Implementación estudiantes
 │       ├── ZoneRepository.cs # ✅ Implementación zonas
-│       └── ClassRepository.cs# ✅ Implementación clases
+│       ├── ClassRepository.cs# ✅ Implementación clases
+│       ├── PlanRepository.cs # ✅ Implementación planes
+│       └── SubscriptionRepository.cs# ✅ Implementación suscripciones
 ├── 📁 Middleware/            # Middlewares personalizados
 │   └── GlobalExceptionMiddleware.cs # ✅ Manejo de errores
 ├── 📁 Mapping/               # Perfiles de AutoMapper
@@ -412,13 +425,30 @@ dotnet ef database update MigracionAnterior
 - `GET /api/classes/instructor/{id}/conflicts` - Verificar conflictos de instructor
 - `GET /api/classes/zone/{id}/conflicts` - Verificar conflictos de zona
 
-### 💳 Planes y Suscripciones (🚧 Próximamente)
-- `GET /api/plans` - Listar planes
-- `POST /api/plans` - Crear plan
-- `GET /api/plans/{id}` - Obtener plan
-- `PUT /api/plans/{id}` - Actualizar plan
-- `GET /api/subscriptions` - Listar suscripciones
-- `POST /api/subscriptions` - Crear suscripción
+### 💳 Planes (✅ Implementados)
+- `GET /api/plans` - Listar todos los planes (Admin/Instructor)
+- `GET /api/plans/active` - Listar planes activos
+- `GET /api/plans/{id}` - Obtener plan por ID
+- `POST /api/plans` - Crear nuevo plan (Solo Admin)
+- `PUT /api/plans/{id}` - Actualizar plan (Solo Admin)
+- `DELETE /api/plans/{id}` - Eliminar plan (Solo Admin)
+- `GET /api/plans/{id}/active-subscriptions` - Verificar suscripciones activas (Solo Admin)
+
+### 📋 Suscripciones (✅ Implementados)
+- `GET /api/subscriptions` - Listar suscripciones con filtros (Admin/Instructor)
+- `GET /api/subscriptions/active` - Listar suscripciones activas (Admin/Instructor)
+- `GET /api/subscriptions/expired` - Listar suscripciones vencidas (Solo Admin)
+- `GET /api/subscriptions/expiring-soon?daysThreshold={days}` - Suscripciones por vencer
+- `GET /api/subscriptions/{id}` - Obtener suscripción por ID
+- `GET /api/subscriptions/student/{id}` - Obtener suscripciones de un estudiante
+- `GET /api/subscriptions/student/{id}/active` - Obtener suscripción activa de estudiante
+- `GET /api/subscriptions/plan/{id}` - Obtener suscripciones de un plan
+- `POST /api/subscriptions` - Crear nueva suscripción (Solo Admin)
+- `PUT /api/subscriptions/{id}` - Actualizar suscripción (Solo Admin)
+- `POST /api/subscriptions/{id}/renew` - Renovar suscripción (Solo Admin)
+- `DELETE /api/subscriptions/{id}` - Eliminar suscripción (Solo Admin)
+- `GET /api/subscriptions/student/{id}/can-reserve` - Verificar si puede reservar clases
+- `POST /api/subscriptions/process-expired` - Procesar suscripciones vencidas (Solo Admin)
 
 ### 📅 Reservas (🚧 Próximamente)
 - `GET /api/reservations` - Listar reservas
@@ -568,11 +598,13 @@ ENTRYPOINT ["dotnet", "PilatesStudioAPI.dll"]
 - [x] Consultas y filtros avanzados para clases
 - [x] Validaciones de capacidad y lógica de negocio
 
-### Fase 4: 💳 Planes y Suscripciones
-- [ ] CRUD de planes
-- [ ] Sistema de suscripciones
-- [ ] Lógica de expiración
-- [ ] Renovaciones automáticas
+### Fase 4: ✅ Planes y Suscripciones (Completada)
+- [x] CRUD completo de planes con validaciones avanzadas
+- [x] Sistema integral de suscripciones con estados
+- [x] Lógica de expiración y control automático
+- [x] Sistema de renovaciones y gestión de clases restantes
+- [x] Validaciones de suscripciones activas para reservas
+- [x] Filtros avanzados y consultas especializadas
 
 ### Fase 5: 📝 Sistema de Reservas
 - [ ] Booking de clases
@@ -624,6 +656,40 @@ Abre un issue en GitHub con:
 - Información del entorno
 
 ## 📝 Changelog
+
+### [4.0.0] - 2025-09-11
+#### 🎉 Fase 4 Completada: Planes y Suscripciones
+- ✅ **Sistema Completo de Planes**
+  - CRUD completo con validaciones de precios y capacidades
+  - Control de títulos únicos y estados activo/inactivo
+  - Gestión de validez en días y clases mensuales incluidas
+  - Soft delete inteligente cuando hay suscripciones activas
+- ✅ **Sistema Avanzado de Suscripciones**
+  - CRUD completo con control de estados (activa, vencida, cancelada)
+  - Gestión automática de fechas de expiración y clases restantes
+  - Sistema de renovación de suscripciones con cambio de plan
+  - Control de suscripciones activas por estudiante (una por vez)
+- ✅ **Lógica de Negocio Robusta**
+  - Validaciones de suscripciones activas para permitir reservas
+  - Descuento automático de clases al usar reservas
+  - Procesamiento masivo de suscripciones vencidas
+  - Control de expiración con alertas tempranas configurables
+- ✅ **Consultas Especializadas**
+  - Filtrado avanzado por estudiante, plan, estado y fechas
+  - Consultas de suscripciones por vencer con umbral configurable
+  - Verificación de elegibilidad para reservas de clases
+  - Dashboard de suscripciones activas y vencidas
+- ✅ **Validaciones y DTOs Exhaustivos**
+  - FluentValidation con reglas de negocio específicas
+  - DTOs con información calculada (días restantes, clases usadas)
+  - Mapeo automático con AutoMapper incluyendo datos derivados
+  - Estados de expiración con alertas visuales
+
+#### 🔧 Mejoras Arquitectónicas
+- Repositorio Student completado para integridad de dependencias
+- AutoMapper configurado con lógica compleja de mapeo para suscripciones
+- Controladores con autorización granular por funcionalidad
+- Servicios con validaciones de lógica de negocio específicas del dominio
 
 ### [3.0.0] - 2025-09-11
 #### 🎉 Fase 3 Completada: Gestión de Clases y Horarios

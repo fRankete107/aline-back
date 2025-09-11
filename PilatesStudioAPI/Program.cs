@@ -177,8 +177,11 @@ builder.Services.AddSwaggerGen(options =>
 
 // Register Repositories
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IInstructorRepository, PilatesStudioAPI.Repositories.Implementations.InstructorRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IStudentRepository, PilatesStudioAPI.Repositories.Implementations.StudentRepository>();
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IZoneRepository, PilatesStudioAPI.Repositories.Implementations.ZoneRepository>();
 builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IClassRepository, PilatesStudioAPI.Repositories.Implementations.ClassRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.IPlanRepository, PilatesStudioAPI.Repositories.Implementations.PlanRepository>();
+builder.Services.AddScoped<PilatesStudioAPI.Repositories.Interfaces.ISubscriptionRepository, PilatesStudioAPI.Repositories.Implementations.SubscriptionRepository>();
 
 // Register application services (repositories, services, etc.)
 builder.Services.AddScoped<IJwtService, JwtService>();
@@ -187,6 +190,8 @@ builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IZoneService, PilatesStudioAPI.Services.Implementations.ZoneService>();
 builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IClassService, PilatesStudioAPI.Services.Implementations.ClassService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.IPlanService, PilatesStudioAPI.Services.Implementations.PlanService>();
+builder.Services.AddScoped<PilatesStudioAPI.Services.Interfaces.ISubscriptionService, PilatesStudioAPI.Services.Implementations.SubscriptionService>();
 
 var app = builder.Build();
 
