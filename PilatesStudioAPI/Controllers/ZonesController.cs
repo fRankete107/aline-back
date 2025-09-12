@@ -80,7 +80,7 @@ public class ZonesController : ControllerBase
     /// Create a new zone
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<ZoneDto>> CreateZone([FromBody] CreateZoneDto createZoneDto)
     {
         try
@@ -103,7 +103,7 @@ public class ZonesController : ControllerBase
     /// Update a zone
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<ZoneDto>> UpdateZone(long id, [FromBody] UpdateZoneDto updateZoneDto)
     {
         try
@@ -129,7 +129,7 @@ public class ZonesController : ControllerBase
     /// Delete a zone (soft delete if has classes, hard delete if no classes)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteZone(long id)
     {
         try
