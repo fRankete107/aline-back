@@ -7,7 +7,7 @@ namespace PilatesStudioAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "admin")]
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsService _analyticsService;
@@ -476,7 +476,7 @@ public class AnalyticsController : ControllerBase
     /// Get student activity
     /// </summary>
     [HttpGet("students/{studentId}/activity")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<Dictionary<string, object>>> GetStudentActivity(long studentId, [FromQuery] AnalyticsFilterDto? filter = null)
     {
         try

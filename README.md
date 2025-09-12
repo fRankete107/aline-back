@@ -709,6 +709,15 @@ Abre un issue en GitHub con:
 
 ## 📝 Changelog
 
+### [6.1.0] - 2025-09-12
+#### 🔧 Fix Crítico: Autorización por Roles
+- 🐛 **Fix Masivo de Autorización** - Corregido problema recurrente de roles en mayúsculas
+- ✅ **Controladores Afectados**: PaymentsController, SubscriptionsController, AnalyticsController, ReservationsController
+- 🔧 **Root Cause**: Inconsistencia entre `[Authorize(Roles = "Admin")]` vs configuración `RequireRole("admin")`
+- 📊 **32+ instancias corregidas** - Todos los roles ahora en minúsculas consistentes
+- ✅ **Testing Módulo Planes** - Completado exitosamente con documentación completa
+- 🚀 **Estado**: Todos los controladores listos para testing sin problemas de autorización
+
 ### [6.0.0] - 2025-09-11
 #### 🎉 Fase 6 Completada: Sistema de Pagos
 - ✅ **Sistema Completo de Pagos**

@@ -35,7 +35,7 @@ public class PaymentsController : ControllerBase
     /// Get all payments (Admin only)
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetAllPayments()
     {
         var payments = await _paymentService.GetAllPaymentsAsync();
@@ -84,7 +84,7 @@ public class PaymentsController : ControllerBase
     /// Update payment details
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<PaymentDto>> UpdatePayment(long id, UpdatePaymentDto updatePaymentDto)
     {
         var validationResult = await _updatePaymentValidator.ValidateAsync(updatePaymentDto);
@@ -109,7 +109,7 @@ public class PaymentsController : ControllerBase
     /// Delete a payment (Admin only - only pending/failed payments)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult> DeletePayment(long id)
     {
         try
@@ -130,7 +130,7 @@ public class PaymentsController : ControllerBase
     /// Get filtered payments
     /// </summary>
     [HttpPost("filter")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetFilteredPayments(PaymentFilterDto filter)
     {
         var validationResult = await _filterValidator.ValidateAsync(filter);
@@ -162,7 +162,7 @@ public class PaymentsController : ControllerBase
     /// Get payments by plan (Admin/Instructor only)
     /// </summary>
     [HttpGet("plan/{planId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByPlan(long planId)
     {
         try
@@ -180,7 +180,7 @@ public class PaymentsController : ControllerBase
     /// Get payments by date range (Admin/Instructor only)
     /// </summary>
     [HttpGet("date-range")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByDateRange(
         [FromQuery] DateTime startDate, 
         [FromQuery] DateTime endDate)
@@ -200,7 +200,7 @@ public class PaymentsController : ControllerBase
     /// Get payments by status (Admin/Instructor only)
     /// </summary>
     [HttpGet("status/{status}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByStatus(string status)
     {
         try
@@ -218,7 +218,7 @@ public class PaymentsController : ControllerBase
     /// Get pending payments (Admin only)
     /// </summary>
     [HttpGet("pending")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPendingPayments()
     {
         var payments = await _paymentService.GetPendingPaymentsAsync();
@@ -229,7 +229,7 @@ public class PaymentsController : ControllerBase
     /// Get refundable payments (Admin only)
     /// </summary>
     [HttpGet("refundable")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetRefundablePayments([FromQuery] int daysLimit = 30)
     {
         var payments = await _paymentService.GetRefundablePaymentsAsync(daysLimit);
@@ -240,7 +240,7 @@ public class PaymentsController : ControllerBase
     /// Get payment statistics (Admin only)
     /// </summary>
     [HttpGet("stats")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaymentStatsDto>> GetPaymentStats(
         [FromQuery] DateTime? startDate = null, 
         [FromQuery] DateTime? endDate = null)
@@ -253,7 +253,7 @@ public class PaymentsController : ControllerBase
     /// Process payment (Admin only)
     /// </summary>
     [HttpPost("{id}/process")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaymentDto>> ProcessPayment(long id, [FromBody] ProcessPaymentDto processDto)
     {
         if (string.IsNullOrEmpty(processDto.Status))
@@ -278,7 +278,7 @@ public class PaymentsController : ControllerBase
     /// Refund payment (Admin only)
     /// </summary>
     [HttpPost("{id}/refund")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PaymentDto>> RefundPayment(long id, RefundPaymentDto refundDto)
     {
         var validationResult = await _refundValidator.ValidateAsync(refundDto);
@@ -338,7 +338,7 @@ public class PaymentsController : ControllerBase
     /// Get payments by payment method (Admin only)
     /// </summary>
     [HttpGet("method/{paymentMethod}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IEnumerable<PaymentDto>>> GetPaymentsByMethod(string paymentMethod)
     {
         try
@@ -378,7 +378,7 @@ public class PaymentsController : ControllerBase
     /// Process pending payments (Admin only - batch operation)
     /// </summary>
     [HttpPost("process-pending")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult> ProcessPendingPayments()
     {
         var processedCount = await _paymentService.ProcessPendingPaymentsAsync();

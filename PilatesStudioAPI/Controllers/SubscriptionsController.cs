@@ -23,7 +23,7 @@ public class SubscriptionsController : ControllerBase
     /// Get all subscriptions with optional filtering
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<SubscriptionDto>>> GetSubscriptions([FromQuery] SubscriptionFilterDto? filter = null)
     {
         try
@@ -55,7 +55,7 @@ public class SubscriptionsController : ControllerBase
     /// Get active subscriptions
     /// </summary>
     [HttpGet("active")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<SubscriptionDto>>> GetActiveSubscriptions()
     {
         try
@@ -74,7 +74,7 @@ public class SubscriptionsController : ControllerBase
     /// Get expired subscriptions
     /// </summary>
     [HttpGet("expired")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<IEnumerable<SubscriptionDto>>> GetExpiredSubscriptions()
     {
         try
@@ -93,7 +93,7 @@ public class SubscriptionsController : ControllerBase
     /// Get subscriptions expiring soon
     /// </summary>
     [HttpGet("expiring-soon")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<SubscriptionDto>>> GetExpiringSoon([FromQuery] int daysThreshold = 7)
     {
         try
@@ -180,7 +180,7 @@ public class SubscriptionsController : ControllerBase
     /// Get subscriptions by plan
     /// </summary>
     [HttpGet("plan/{planId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<SubscriptionDto>>> GetSubscriptionsByPlan(long planId)
     {
         try
@@ -203,7 +203,7 @@ public class SubscriptionsController : ControllerBase
     /// Create a new subscription
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<SubscriptionDto>> CreateSubscription([FromBody] CreateSubscriptionDto createSubscriptionDto)
     {
         try
@@ -230,7 +230,7 @@ public class SubscriptionsController : ControllerBase
     /// Update a subscription
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<SubscriptionDto>> UpdateSubscription(long id, [FromBody] UpdateSubscriptionDto updateSubscriptionDto)
     {
         try
@@ -252,7 +252,7 @@ public class SubscriptionsController : ControllerBase
     /// Renew a subscription
     /// </summary>
     [HttpPost("{id}/renew")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<SubscriptionDto>> RenewSubscription(long id, [FromBody] RenewSubscriptionDto renewSubscriptionDto)
     {
         try
@@ -275,7 +275,7 @@ public class SubscriptionsController : ControllerBase
     /// Delete a subscription (soft delete if has reservations, hard delete if no reservations)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteSubscription(long id)
     {
         try
@@ -315,7 +315,7 @@ public class SubscriptionsController : ControllerBase
     /// Process expired subscriptions (admin maintenance task)
     /// </summary>
     [HttpPost("process-expired")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<int>> ProcessExpiredSubscriptions()
     {
         try

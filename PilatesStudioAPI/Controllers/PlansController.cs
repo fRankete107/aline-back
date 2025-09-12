@@ -80,7 +80,7 @@ public class PlansController : ControllerBase
     /// Create a new plan
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PlanDto>> CreatePlan([FromBody] CreatePlanDto createPlanDto)
     {
         try
@@ -103,7 +103,7 @@ public class PlansController : ControllerBase
     /// Update a plan
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<PlanDto>> UpdatePlan(long id, [FromBody] UpdatePlanDto updatePlanDto)
     {
         try
@@ -129,7 +129,7 @@ public class PlansController : ControllerBase
     /// Delete a plan (soft delete if has active subscriptions, hard delete if no subscriptions)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeletePlan(long id)
     {
         try
@@ -151,7 +151,7 @@ public class PlansController : ControllerBase
     /// Check if plan has active subscriptions
     /// </summary>
     [HttpGet("{id}/active-subscriptions")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<bool>> HasActiveSubscriptions(long id)
     {
         try

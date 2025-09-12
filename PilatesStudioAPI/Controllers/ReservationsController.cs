@@ -23,7 +23,7 @@ public class ReservationsController : ControllerBase
     /// Get all reservations with optional filtering
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservations([FromQuery] ReservationFilterDto? filter = null)
     {
         try
@@ -120,7 +120,7 @@ public class ReservationsController : ControllerBase
     /// Get reservations by class
     /// </summary>
     [HttpGet("class/{classId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationsByClass(long classId)
     {
         try
@@ -143,7 +143,7 @@ public class ReservationsController : ControllerBase
     /// Get reservations by instructor
     /// </summary>
     [HttpGet("instructor/{instructorId}")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<ActionResult<IEnumerable<ReservationDto>>> GetReservationsByInstructor(long instructorId)
     {
         try
@@ -188,7 +188,7 @@ public class ReservationsController : ControllerBase
     /// Update a reservation
     /// </summary>
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<ReservationDto>> UpdateReservation(long id, [FromBody] UpdateReservationDto updateReservationDto)
     {
         try
@@ -236,7 +236,7 @@ public class ReservationsController : ControllerBase
     /// Complete a reservation (mark as completed)
     /// </summary>
     [HttpPost("{id}/complete")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<IActionResult> CompleteReservation(long id)
     {
         try
@@ -258,7 +258,7 @@ public class ReservationsController : ControllerBase
     /// Mark reservation as no-show
     /// </summary>
     [HttpPost("{id}/no-show")]
-    [Authorize(Roles = "Admin,Instructor")]
+    [Authorize(Roles = "admin,instructor")]
     public async Task<IActionResult> MarkAsNoShow(long id)
     {
         try
@@ -280,7 +280,7 @@ public class ReservationsController : ControllerBase
     /// Delete a reservation (hard delete - admin only)
     /// </summary>
     [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> DeleteReservation(long id)
     {
         try
@@ -338,7 +338,7 @@ public class ReservationsController : ControllerBase
     /// Process completed reservations (admin maintenance task)
     /// </summary>
     [HttpPost("process-completed")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult<int>> ProcessCompletedReservations()
     {
         try
